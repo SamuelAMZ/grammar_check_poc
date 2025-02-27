@@ -9,6 +9,7 @@ export default function Home() {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
   const [inputErrors, setInputErrors] = useState([]);
+  const [isChecking, setIsChecking] = useState(false);
   const textareaRef = useRef(null);
   const debounceTimeout = useRef(null);
   const pendingRequestRef = useRef({ text: "", timestamp: 0 });
@@ -33,12 +34,14 @@ export default function Home() {
 
     // Debounce API calls to avoid overwhelming the server
     clearTimeout(debounceTimeout.current);
-    debounceTimeout.current = setTimeout(() => {
+    debounceTimeout.current = setTimeout(async () => {
       if (text.trim()) {
         // Track the current request with a timestamp
         const timestamp = Date.now();
         pendingRequestRef.current = { text, timestamp };
-        sendToApi(text, timestamp);
+        setIsChecking(true);
+        await sendToApi(text, timestamp);
+        setIsChecking(false);
       }
     }, interval);
   };
@@ -91,8 +94,16 @@ export default function Home() {
     <div className="w-full h-screen grid place-items-center">
       <div className="w-[90%] lg:w-[60%] mx-auto">
         <div className="space-y-8">
-          <div className="w-full space-y-2 text-[#133C38] text-[1rem] px-4 py-2 bg-[#EFEFEF] shadow-none outline-none rounded-xl border border-solid border-[#EFEFEF]">
+          <div className=" relative w-full space-y-2 text-[#133C38] text-[1rem] px-4 py-2 bg-[#EFEFEF] shadow-none outline-none rounded-xl border border-solid border-[#EFEFEF]">
             <span className="font-bold text-md">Output</span>
+            {isChecking ? (
+              <img
+                src="/spinner.svg"
+                width={45}
+                height={"auto"}
+                className="bg-transparent absolute right-2 -top-2"
+              />
+            ) : null}
             <div className="w-full min-h-[5rem] text-[#434343] resize-none overflow-hidden bg-transparent outline-none">
               {inputText?.trim() ? (
                 <div
