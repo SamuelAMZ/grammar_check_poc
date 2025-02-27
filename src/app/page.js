@@ -8,6 +8,7 @@ import { highlightMismatches } from "@/lib/highlightMismatches";
 export default function Home() {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
+  const [inputErrors, setInputErrors] = useState([]);
   const textareaRef = useRef(null);
   const debounceTimeout = useRef(null);
   const pendingRequestRef = useRef({ text: "", timestamp: 0 });
@@ -63,14 +64,28 @@ export default function Home() {
       }
 
       const { errors } = data;
-
-      const highlightedText = highlightMismatches(errors, inputText);
-      setOutputText(highlightedText);
+      // console.log(errors, "errors");
+      setInputErrors(errors);
     } catch (error) {
       console.error("Error correcting text:", error);
       toast.error("Error correcting text");
     }
   };
+
+  useEffect(() => {
+    const text = inputText;
+    // console.log(inputErrors, "errors useEffect");
+    let newText = text;
+    if (inputErrors && inputErrors.length) {
+      newText = highlightMismatches(inputErrors, inputText);
+    }
+
+    // console.log(newText === outputText, "text ", newText);
+    if (newText != outputText) {
+      // console.log(text, "error text");
+      setOutputText(newText);
+    }
+  }, [inputErrors, inputText]);
 
   return (
     <div className="w-full h-screen grid place-items-center">

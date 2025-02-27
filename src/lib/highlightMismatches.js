@@ -1,35 +1,30 @@
-export function highlightMismatches(errors, inputText) {
-  // Only process if we have errors to highlight
-  if (errors && errors.length > 0) {
-    // Create a copy of the current input
-    // This is important - we want to highlight the current text
-    // not the text that was sent to the API
-    let currentText = inputText;
+export function highlightMismatches(errors, text) {
+  let markedText = text;
+  let offset = 0;
+  // Track the last matched index
+  let previousIndex = 0;
 
-    // Sort errors by index (highest to lowest to avoid position shifts)
-    const sortedErrors = [...errors].sort((a, b) => b.index - a.index);
+  // Sort errors by index to process them in order
+  const sortedErrors = [...errors].sort((a, b) => a.index - b.index);
 
-    // Process each error
-    sortedErrors.forEach((error) => {
-      const { word } = error;
+  for (const error of sortedErrors) {
+    const wordToFind = error.word;
 
-      // Find the real position of the error word in the current text
-      // We need to do this instead of using the index because the user might have
-      // continued typing, changing the position
-      const wordPosition = currentText.indexOf(word);
+    // Start searching from the last modified index
+    const actualIndex = markedText.indexOf(wordToFind, previousIndex);
 
-      if (wordPosition >= 0) {
-        // Highlight the error
-        const highlightedError = `<span class="text-red-500 underline error">${word}</span>`;
+    if (actualIndex >= 0) {
+      // Replace the word with a highlighted version
+      const beforeError = markedText.substring(0, actualIndex);
+      const afterError = markedText.substring(actualIndex + wordToFind.length);
+      const highlightedError = `<span class="bg-red-300 px-1 rounded error">${wordToFind}</span>`;
 
-        // Replace the error word with its highlighted version
-        currentText =
-          currentText.substring(0, wordPosition) +
-          highlightedError +
-          currentText.substring(wordPosition + word.length);
-      }
-    });
+      markedText = beforeError + highlightedError + afterError;
 
-    return currentText;
+      // Update previous index to start next search from this error position
+      previousIndex = actualIndex + highlightedError.length;
+    }
   }
+
+  return markedText;
 }
