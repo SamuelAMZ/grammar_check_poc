@@ -16,9 +16,21 @@ export async function POST(req) {
         messages: [
           {
             role: "system",
-            content: "Correct grammar errors in this sentence: " + text,
+            content: `You are a grammar correction assistant. Given a sentence, return a structured JSON response with the corrected text, errors, and word indexes.
+
+      Format:
+      {
+        "correctText": "Corrected sentence",
+        "errors": [
+          { "word": "incorrectWord", "index": wordIndex, "correctWord": "correctWord" }
+        ],
+        "text": "Original input text"
+      }
+
+      Correct the following sentence: "${text}"`,
           },
         ],
+        temperature: 0,
       },
       {
         headers: {
@@ -28,10 +40,13 @@ export async function POST(req) {
       }
     );
 
-    const correctedText =
-      response.data.choices[0]?.message?.content.trim() || text;
+    // Parse OpenAI's response
+    const structuredResponse = JSON.parse(
+      response.data.choices[0].message.content
+    );
+    console.log(structuredResponse);
 
-    return NextResponse.json({ correctedText });
+    return NextResponse.json({ ...structuredResponse });
   } catch (error) {
     console.error("Error calling OpenAI API:", error);
     return NextResponse.json(
