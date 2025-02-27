@@ -26,7 +26,7 @@ export function highlightMismatches(apiResponse) {
       const afterError = markedText.substring(actualIndex + wordToFind.length);
 
       // Use whatever highlighting format you prefer
-      const highlightedError = `<span class="bg-red-300 px-1 rounded">${wordToFind}</span>`;
+      const highlightedError = `<span class="bg-red-300 px-1 rounded error">${wordToFind}</span>`;
       markedText = beforeError + highlightedError + afterError;
 
       // Update offset for future replacements
@@ -34,13 +34,6 @@ export function highlightMismatches(apiResponse) {
         (beforeError + highlightedError).length -
         (beforeError + wordToFind).length;
       offset += newOffset;
-
-      console.log(
-        highlightedError.length,
-        "highlightedError",
-        beforeError.length,
-        afterError.length
-      );
 
       // Store the mapping for verification
       offsets.push({

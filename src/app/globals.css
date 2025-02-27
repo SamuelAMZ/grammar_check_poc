@@ -119,3 +119,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+.error{
+  background-color: #fca5a5;
+  padding-inline: 0.25rem;
+  border-radius: 0.25rem;
+}

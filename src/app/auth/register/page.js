@@ -60,7 +60,7 @@ export default function RegisterPage() {
         router.push("/auth/login");
       }
     } catch (error) {
-      console.log(error, "error");
+      // console.log(error, "error");
       const errorMessage =
         error.response?.data?.message || "Uh oh! Something went wrong.";
       toast(errorMessage);

@@ -17,7 +17,7 @@ export async function connectToDatabase() {
 
   if (!cached.promise) {
     cached.promise = mongoose
-      .connect(MONGODB_URI, { useUnifiedTopology: true })
+      .connect(MONGODB_URI)
       .then((mongoose) => mongoose);
   }
 

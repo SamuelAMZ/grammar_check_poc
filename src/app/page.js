@@ -14,6 +14,11 @@ export default function Home() {
 
   const handleInput = (e) => {
     const text = e.target.value;
+    if (text?.trim()?.length === 0) {
+      setOutputText("");
+      setMessage("");
+      return;
+    }
     setMessage(text);
     autoResize(e.target);
 
@@ -22,7 +27,7 @@ export default function Home() {
       if (text.trim()) {
         sendToApi(text);
       }
-    }, 2000);
+    }, 500);
   };
 
   const autoResize = (textarea) => {
@@ -56,12 +61,19 @@ export default function Home() {
         <div className="space-y-8">
           <div className="w-full space-y-2 text-[#133C38] text-[1rem] px-4 py-2 bg-[#EFEFEF] shadow-none outline-none rounded-xl border border-solid border-[#EFEFEF]">
             <span className="font-bold text-md">Output</span>
-            <div
-              className="w-full min-h-[5rem] text-[#434343] resize-none overflow-hidden bg-transparent outline-none"
-              dangerouslySetInnerHTML={{
-                __html: highlightedText || outputText,
-              }}
-            />
+            <div className="w-full min-h-[5rem] text-[#434343] resize-none overflow-hidden bg-transparent outline-none">
+              {message?.trim() && outputText?.trim() ? (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: highlightedText || outputText,
+                  }}
+                />
+              ) : (
+                <span className="text-gray-400">
+                  Output will appear here...
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center w-full  text-[#133C38] text-[1rem] px-4 py-2 bg-[#ffffff] shadow-none outline-none rounded-xl border border-solid border-[#cecece]">
