@@ -1,33 +1,45 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { toast } from "sonner";
 import { highlightMismatches } from "@/lib/highlightMismatches";
 
 export default function Home() {
-  const [message, setMessage] = useState("");
+  const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
-  const [highlightedText, setHighlightedText] = useState("");
   const textareaRef = useRef(null);
   const debounceTimeout = useRef(null);
+  const pendingRequestRef = useRef({ text: "", timestamp: 0 });
+  const interval = 500;
 
   const handleInput = (e) => {
     const text = e.target.value;
+
+    // Handle empty text case
     if (text?.trim()?.length === 0) {
       setOutputText("");
-      setMessage("");
+      setInputText("");
       return;
     }
-    setMessage(text);
+
+    setInputText(text);
+
+    // Always update output with the latest input text
+    // This ensures users see what they're typing immediately
+    setOutputText(text);
     autoResize(e.target);
 
+    // Debounce API calls to avoid overwhelming the server
     clearTimeout(debounceTimeout.current);
     debounceTimeout.current = setTimeout(() => {
       if (text.trim()) {
-        sendToApi(text);
+        // Track the current request with a timestamp
+        const timestamp = Date.now();
+        pendingRequestRef.current = { text, timestamp };
+        sendToApi(text, timestamp);
       }
-    }, 500);
+    }, interval);
   };
 
   const autoResize = (textarea) => {
@@ -35,20 +47,25 @@ export default function Home() {
     textarea.style.height = `${textarea.scrollHeight}px`;
   };
 
-  const sendToApi = async (text) => {
+  const sendToApi = async (text, requestTimestamp) => {
     try {
-      const { data } = await axios.post("/api/correct", { text: text });
-      const { correctText, errors } = data;
+      // Make the API call
+      const { data } = await axios.post("/api/correct", { text });
 
-      if (correctText) {
-        setOutputText(correctText);
-        const { highlightedText } = highlightMismatches({
-          text,
-          correctText,
-          errors,
-        });
-        setHighlightedText(highlightedText);
+      // Ignore stale responses (if user has made a newer request)
+      if (requestTimestamp !== pendingRequestRef.current.timestamp) {
+        return;
       }
+
+      // Handle case where API returns no data
+      if (!data) {
+        return;
+      }
+
+      const { errors } = data;
+
+      const highlightedText = highlightMismatches(errors, inputText);
+      setOutputText(highlightedText);
     } catch (error) {
       console.error("Error correcting text:", error);
       toast.error("Error correcting text");
@@ -62,10 +79,10 @@ export default function Home() {
           <div className="w-full space-y-2 text-[#133C38] text-[1rem] px-4 py-2 bg-[#EFEFEF] shadow-none outline-none rounded-xl border border-solid border-[#EFEFEF]">
             <span className="font-bold text-md">Output</span>
             <div className="w-full min-h-[5rem] text-[#434343] resize-none overflow-hidden bg-transparent outline-none">
-              {message?.trim() && outputText?.trim() ? (
+              {inputText?.trim() ? (
                 <div
                   dangerouslySetInnerHTML={{
-                    __html: highlightedText || outputText,
+                    __html: outputText,
                   }}
                 />
               ) : (
@@ -79,7 +96,7 @@ export default function Home() {
           <div className="flex items-center w-full  text-[#133C38] text-[1rem] px-4 py-2 bg-[#ffffff] shadow-none outline-none rounded-xl border border-solid border-[#cecece]">
             <textarea
               ref={textareaRef}
-              value={message}
+              value={inputText}
               onChange={handleInput}
               rows={5}
               placeholder="Start typing..."

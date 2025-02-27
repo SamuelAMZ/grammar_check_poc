@@ -53,7 +53,7 @@ export async function POST(req) {
     const structuredResponse = JSON.parse(
       response.data.choices[0].message.content
     );
-    // console.log(structuredResponse);
+    // console.log(structuredResponse, "api response");
 
     return NextResponse.json({ ...structuredResponse });
   } catch (error) {
