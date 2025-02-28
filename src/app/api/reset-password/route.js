@@ -1,6 +1,7 @@
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import { connectToDatabase } from "../../../../lib/mongodb";
 
 export async function POST(req) {
   const { email, newPassword } = await req.json();
@@ -17,6 +18,7 @@ export async function POST(req) {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
     // Update user password in the database
+    await connectToDatabase();
     await User.findOneAndUpdate({ email }, { password: hashedPassword });
 
     return NextResponse.json({
