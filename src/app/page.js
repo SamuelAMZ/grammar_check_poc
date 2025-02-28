@@ -5,6 +5,8 @@ import axios from "axios";
 import { toast } from "sonner";
 import { highlightMismatches } from "@/lib/highlightMismatches";
 
+import { Button } from "@/components/ui/button";
+
 export default function Home() {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
@@ -90,11 +92,15 @@ export default function Home() {
     }
   }, [inputErrors, inputText]);
 
+  const handleLogout = () => {
+    window.location.href = `${window.location.origin}/auth/logout`;
+  };
+
   return (
     <div className="w-full h-screen grid place-items-center">
       <div className="w-[90%] lg:w-[60%] mx-auto">
         <div className="space-y-8">
-          <div className=" relative w-full space-y-2 text-[#133C38] text-[1rem] px-4 py-2 bg-[#EFEFEF] shadow-none outline-none rounded-xl border border-solid border-[#EFEFEF]">
+          <div className="relative w-full space-y-2 text-[#133C38] text-[1rem] px-4 py-2 bg-[#EFEFEF] shadow-none outline-none rounded-xl border border-solid border-[#EFEFEF]">
             <span className="font-bold text-md">Output</span>
             {isChecking ? (
               <img
@@ -119,7 +125,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="flex items-center w-full  text-[#133C38] text-[1rem] px-4 py-2 bg-[#ffffff] shadow-none outline-none rounded-xl border border-solid border-[#cecece]">
+          <div className="flex items-center w-full text-[#133C38] text-[1rem] px-4 py-2 bg-[#ffffff] shadow-none outline-none rounded-xl border border-solid border-[#cecece]">
             <textarea
               ref={textareaRef}
               value={inputText}
@@ -131,6 +137,14 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {/* Floating logout button */}
+      <Button
+        onClick={handleLogout}
+        className="fixed bottom-5 right-5  transition"
+      >
+        Logout
+      </Button>
     </div>
   );
 }
